@@ -1,0 +1,24 @@
+name: Makefile CI
+
+on:
+  # Run using manual triggers from GitHub UI:
+  # https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow
+  workflow_dispatch: {}
+  # Run on every push:
+  push: {}
+  # Run on pull request activity:
+  pull_request: {}
+
+
+jobs:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - uses: leanprover/lean-action@v1
+      with:
+        auto-config: true
+        use-mathlib-cache: false
+        use-github-cache: true
