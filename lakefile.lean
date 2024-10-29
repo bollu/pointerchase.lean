@@ -1,12 +1,15 @@
 import Lake
 open Lake DSL
 
-package "bdd-lean" where
+package "pointerchase" where
   -- add package configuration options here
 
-lean_lib Bdd.Basic where
+lean_lib PointerChase where
+  -- add library configuration options here
+
+lean_lib Examples where
   -- add library configuration options here
 
 @[default_target]
-lean_exe "bdd-lean" where
-  root := `Main
+lean_exe "chase.examples" where
+  root := `Examples
