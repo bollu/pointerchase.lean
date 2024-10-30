@@ -1,5 +1,61 @@
 import PointerChase.Basic
 -- Little engines of proof, lecture 4
+-- https://www.csl.sri.com/people/shankar/LEP/LEP5.pdf
+
+
+/-- The (polynomial) functor of the data we want to store, parametrized by the pointer locations -/
+inductive NodeF (α : Type) (f : Type) where
+| value (value : Bool)
+| var (a : α) (low high : f)
+
+instance : Functor (NodeF α) where
+  map f
+  | .value v => .value v
+  | .var a low high => .var a (f low) (f high)
+
+/-
+abbrev Nodes (α : Type) := PointerChase.Nodes (NodeF α)
+
+
+/--
+Sweet lord, this actually works!
+I can write imperative looking code where I dereference pointers,
+and have the sweet sweet magic of well founded induction
+to ensure that this terminates. Zero overhead :O.
+-/
+def eg1CaseToEnd {α : Type} (nodes : Nodes ) (p : nodes.Ptr) : Bool :=
+  match p.val with
+  | .value v => v
+  | .var _ low high => eg1CaseToEnd nodes low && eg1CaseToEnd nodes high
+termination_by p
+
+/-
+Why does termination_by not figure this case out?
+It should just chain the inequalities!
+We have that low < p, and high < p, so low < high.
+-/
+def eg2DoubleDeref {α : Type} (nodes : Nodes α) (p : nodes.Ptr) : Bool :=
+  match hp : p.val with
+  | .value v => v
+  | .var _ lowp highp =>
+    match hq : lowp.val with
+    | .value v => v
+    | .var _ lowq highq => eg2DoubleDeref nodes lowq && eg2DoubleDeref nodes highq
+termination_by p
+/- This is pure tedium, this should be automatically chained. Ask Joachim? -/
+decreasing_by
+  simp_wf
+  · apply Nodes.Ptr.Lt_trans
+    · have lt := lowq.Lt
+      exact lt
+    · have lt := lowp.Lt
+      exact lt
+  · apply Nodes.Ptr.Lt_trans
+    · have lt := highq.Lt
+      exact lt
+    · have lt := lowp.Lt
+      exact lt
+-- Little engines of proof, lecture 4
 
 -- https://www.csl.sri.com/people/shankar/LEP/LEP5.pdf
 
@@ -105,4 +161,5 @@ def RODD.empty {α : Type} [DecidableEq α] [Hashable α] : RODD α := {
 
 namespace Node
 end Node
+-/
 -/
